@@ -1,0 +1,9 @@
+[package]
+name = "splix_session"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+byteorder = "1.5.0"
+nix = { version = "0.29.0", features = ["term"] }
+splix_pty = { path = "../splix_pty" }

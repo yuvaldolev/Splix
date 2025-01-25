@@ -1,0 +1,8 @@
+[workspace]
+resolver = "2"
+default-members = ["crates/splix_main"]
+members = [
+    "crates/splix",
+    "crates/splix_main", "crates/splix_pty",
+    "crates/splix_session",
+]
