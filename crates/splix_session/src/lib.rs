@@ -1,6 +1,6 @@
 use std::{
     fs::File,
-    io::{self},
+    io,
     process::{Child, Command},
 };
 
@@ -14,10 +14,12 @@ pub struct Session {
 }
 
 impl Session {
-    pub fn new() -> Self {
-        let pty = Pty::open();
+    pub fn new() -> splix_error::Result<Self> {
+        // TODO: Export all terminal related handling stuff into a dedicated struct.
+        let pty = Pty::open()?;
         let (master, slave) = pty.into_parts();
 
+        // TODO: Handle errors.
         let shell = Command::new("/bin/bash")
             .stdin(slave.try_clone().unwrap())
             .stdout(slave.try_clone().unwrap())
@@ -29,10 +31,10 @@ impl Session {
         termios::cfmakeraw(&mut raw_termios);
         termios::tcsetattr(&master, SetArg::TCSANOW, &raw_termios).unwrap();
 
-        Self {
+        Ok(Self {
             pty_master: master,
             shell,
-        }
+        })
     }
 
     pub fn attach(&mut self) {

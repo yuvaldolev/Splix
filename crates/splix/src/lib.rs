@@ -7,8 +7,10 @@ impl Splix {
         Self
     }
 
-    pub fn run(&self) {
-        let mut sessions = vec![Session::new(), Session::new()];
+    pub fn run(&self) -> splix_error::Result<()> {
+        let mut sessions = vec![Session::new()?, Session::new()?];
         sessions[0].attach();
+
+        Ok(())
     }
 }
