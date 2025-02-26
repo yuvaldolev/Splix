@@ -74,7 +74,12 @@ version = "0.1.0"
 dependencies = [
  "splix_error",
  "splix_session",
+ "splix_termios",
 ]
+
+[[package]]
+name = "splix_ansi"
+version = "0.1.0"
 
 [[package]]
 name = "splix_error"
@@ -105,9 +110,17 @@ name = "splix_session"
 version = "0.1.0"
 dependencies = [
  "byteorder",
- "nix",
  "splix_error",
  "splix_pty",
+]
+
+[[package]]
+name = "splix_termios"
+version = "0.1.0"
+dependencies = [
+ "nix",
+ "splix_ansi",
+ "splix_error",
 ]
 
 [[package]]

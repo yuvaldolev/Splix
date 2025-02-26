@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 splix_error = { path = "../splix_error" }
 splix_session = { path = "../splix_session" }
+splix_termios = { path = "../splix_termios" }

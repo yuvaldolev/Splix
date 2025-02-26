@@ -5,7 +5,6 @@ use std::{
 };
 
 use byteorder::{ReadBytesExt, WriteBytesExt};
-use nix::sys::termios::{self, SetArg};
 use splix_pty::Pty;
 
 pub struct Session {
@@ -26,10 +25,6 @@ impl Session {
             .stderr(slave)
             .spawn()
             .unwrap();
-
-        let mut raw_termios = termios::tcgetattr(&master).unwrap();
-        termios::cfmakeraw(&mut raw_termios);
-        termios::tcsetattr(&master, SetArg::TCSANOW, &raw_termios).unwrap();
 
         Ok(Self {
             pty_master: master,
