@@ -6,7 +6,7 @@ members = [
     "crates/splix_ansi",
     "crates/splix_error",
     "crates/splix_main",
-    "crates/splix_pty",
     "crates/splix_session",
+    "crates/splix_terminal",
     "crates/splix_termios",
 ]

@@ -274,14 +274,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "splix",
-]
-
-[[package]]
-name = "splix_pty"
-version = "0.1.0"
-dependencies = [
- "nix",
- "splix_error",
+ "tokio",
 ]
 
 [[package]]
@@ -290,9 +283,16 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "byteorder",
+ "splix_error",
+ "splix_terminal",
+]
+
+[[package]]
+name = "splix_terminal"
+version = "0.1.0"
+dependencies = [
  "nix",
  "splix_error",
- "splix_pty",
  "tokio",
 ]
 

@@ -15,4 +15,10 @@ pub enum Error {
 
     #[error("enter alternate terminal screen")]
     EnterAlternateTerminalScreen(#[source] io::Error),
+
+    #[error("failed forking a new child process in a PTY")]
+    ForkChildProcessInPty(#[source] Errno),
+
+    #[error("failed spawning a terminal child process - WTF???")]
+    TerminalSpawnChild,
 }

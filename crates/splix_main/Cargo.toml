@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.95"
 splix = { path = "../splix" }
+tokio = { version = "1.44.1", features = ["full"] }

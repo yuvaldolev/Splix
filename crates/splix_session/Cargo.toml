@@ -6,7 +6,5 @@ edition = "2021"
 [dependencies]
 async-trait = "0.1.88"
 byteorder = "1.5.0"
-nix = { version = "0.29.0", features = ["poll"] }
 splix_error = { path = "../splix_error" }
-splix_pty = { path = "../splix_pty" }
-tokio = { version = "1.44.1", features = ["full"] }
+splix_terminal = { path = "../splix_terminal" }
