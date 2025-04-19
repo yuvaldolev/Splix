@@ -1,23 +1,20 @@
-use std::io;
-
-use byteorder::WriteBytesExt;
-use splix_terminal::Terminal;
+use splix_window::Window;
 
 pub struct Session {
-    terminal: Terminal,
+    windows: Vec<Window>,
 }
 
 impl Session {
     pub fn new() -> splix_error::Result<Self> {
-        let terminal = Terminal::new()?;
-
-        Ok(Self { terminal })
+        Ok(Self {
+            windows: vec![Window::new()],
+        })
     }
 
     pub async fn attach(&mut self) {
-        loop {
-            let byte = self.terminal.read().await;
-            io::stdout().write_u8(byte).unwrap();
-        }
+        // loop {
+        // let byte = self.terminal.read().await;
+        // io::stdout().write_u8(byte).unwrap();
+        // }
     }
 }

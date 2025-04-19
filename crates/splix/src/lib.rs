@@ -12,9 +12,6 @@ impl Splix {
     }
 
     pub async fn run(&self) -> splix_error::Result<()> {
-        let mut sessions = vec![Session::new()?, Session::new()?];
-        sessions[0].attach().await;
-
         Ok(())
     }
 }

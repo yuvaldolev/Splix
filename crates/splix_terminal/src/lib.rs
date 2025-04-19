@@ -1,6 +1,9 @@
 mod shell_path_resolver;
 
-use std::{ffi::CString, os::unix::ffi::OsStrExt};
+use std::{
+    ffi::CString,
+    os::unix::{ffi::OsStrExt, io::{FromRawFd, IntoRawFd}},
+};
 
 use nix::{
     pty::{self, ForkptyResult},
@@ -8,36 +11,86 @@ use nix::{
 };
 
 use shell_path_resolver::ShellPathResolver;
-use tokio::io::AsyncReadExt;
+use tokio::io::{AsyncBufReadExt, BufReader};
 
 pub struct Terminal {
     _child: Pid,
-    master_pty: tokio::fs::File,
+    reader: BufReader<tokio::fs::File>,
+    incomplete_utf8: Vec<u8>,
 }
 
 impl Terminal {
     pub fn new() -> splix_error::Result<Self> {
         let (child, master_pty) = Self::spawn_child()?;
+        // Convert to std::fs::File first, then to tokio::fs::File
+        let std_file = unsafe { std::fs::File::from_raw_fd(master_pty.into_raw_fd()) };
+        let file = tokio::fs::File::from_std(std_file);
 
         Ok(Self {
             _child: child,
-            master_pty,
+            reader: BufReader::new(file),
+            incomplete_utf8: Vec::new(),
         })
     }
 
-    pub async fn read(&mut self) -> u8 {
-        self.master_pty.read_u8().await.unwrap()
-    }
-
-    fn spawn_child() -> splix_error::Result<(Pid, tokio::fs::File)> {
-        match Self::fork_child_process_in_pty()? {
-            ForkptyResult::Parent { child, master } => {
-                return Ok((child, tokio::fs::File::from(std::fs::File::from(master))))
-            }
-            ForkptyResult::Child => Self::execute_shell()?,
+    pub async fn read(&mut self) -> splix_error::Result<Vec<char>> {
+        // Get the available bytes in the buffer
+        let buffer = self.reader.fill_buf().await.map_err(splix_error::Error::ReadFromPty)?;
+        
+        if buffer.is_empty() {
+            return Ok(Vec::new()); // EOF
         }
 
-        Err(splix_error::Error::TerminalSpawnChild)
+        // Try to decode as much as possible
+        let mut chars = Vec::new();
+        let buffer_len = buffer.len();
+        
+        match std::str::from_utf8(buffer) {
+            Ok(s) => {
+                // Successfully decoded the entire buffer
+                chars.extend(s.chars());
+                self.incomplete_utf8.clear();
+            }
+            Err(e) => {
+                let valid_up_to = e.valid_up_to();
+                if valid_up_to > 0 {
+                    // We have some valid UTF-8, decode it
+                    let s = std::str::from_utf8(&buffer[..valid_up_to]).unwrap();
+                    chars.extend(s.chars());
+                }
+
+                // Check if we have an incomplete UTF-8 sequence at the end
+                if valid_up_to < buffer_len {
+                    // If we have an incomplete sequence from before, combine it
+                    if !self.incomplete_utf8.is_empty() {
+                        self.incomplete_utf8.extend_from_slice(&buffer[valid_up_to..]);
+                    } else {
+                        // Start a new incomplete sequence
+                        self.incomplete_utf8 = buffer[valid_up_to..].to_vec();
+                    }
+                } else {
+                    self.incomplete_utf8.clear();
+                }
+            }
+        }
+
+        // Always consume all bytes from the buffer
+        self.reader.consume(buffer_len);
+
+        Ok(chars)
+    }
+
+    fn spawn_child() -> splix_error::Result<(Pid, std::fs::File)> {
+        match Self::fork_child_process_in_pty()? {
+            ForkptyResult::Parent { child, master } => {
+                let file = unsafe { std::fs::File::from_raw_fd(master.into_raw_fd()) };
+                Ok((child, file))
+            }
+            ForkptyResult::Child => {
+                Self::execute_shell()?;
+                Err(splix_error::Error::TerminalSpawnChild)
+            }
+        }
     }
 
     fn fork_child_process_in_pty() -> splix_error::Result<ForkptyResult> {

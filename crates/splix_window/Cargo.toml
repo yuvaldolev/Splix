@@ -1,0 +1,9 @@
+[package]
+name = "splix_window"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+splix_error = { path = "../splix_error" }
+splix_pane = { path = "../splix_pane" }
+tokio = { version = "1.44.2", features = ["rt", "sync"] }

@@ -21,4 +21,10 @@ pub enum Error {
 
     #[error("failed spawning a terminal child process - WTF???")]
     TerminalSpawnChild,
+
+    #[error("failed reading from PTY")]
+    ReadFromPty(#[source] io::Error),
+
+    #[error("failed sending pane update")]
+    SendPaneUpdate,
 }
