@@ -252,6 +252,7 @@ name = "splix"
 version = "0.1.0"
 dependencies = [
  "splix_error",
+ "splix_id",
  "splix_session",
  "splix_termios",
 ]
@@ -269,6 +270,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "splix_event"
+version = "0.1.0"
+
+[[package]]
+name = "splix_id"
+version = "0.1.0"
+
+[[package]]
 name = "splix_main"
 version = "0.1.0"
 dependencies = [
@@ -282,6 +291,7 @@ name = "splix_pane"
 version = "0.1.0"
 dependencies = [
  "splix_error",
+ "splix_id",
  "splix_terminal",
  "tokio",
 ]
@@ -293,6 +303,7 @@ dependencies = [
  "async-trait",
  "byteorder",
  "splix_error",
+ "splix_id",
  "splix_window",
 ]
 
@@ -319,6 +330,7 @@ name = "splix_window"
 version = "0.1.0"
 dependencies = [
  "splix_error",
+ "splix_id",
  "splix_pane",
  "tokio",
 ]

@@ -25,4 +25,8 @@ impl Grid {
     pub fn new_line(&mut self) {
         self.data.push(Vec::new());
     }
+
+    pub fn get_data(&self) -> &[Vec<char>] {
+        &self.data
+    }
 }

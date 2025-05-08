@@ -7,4 +7,5 @@ edition = "2024"
 async-trait = "0.1.88"
 byteorder = "1.5.0"
 splix_error = { path = "../splix_error" }
+splix_id = { path = "../splix_id" }
 splix_window = { path = "../splix_window" }
