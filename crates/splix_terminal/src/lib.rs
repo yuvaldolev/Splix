@@ -2,16 +2,19 @@ mod shell_path_resolver;
 
 use std::{
     ffi::CString,
-    os::unix::{ffi::OsStrExt, io::{FromRawFd, IntoRawFd}},
+    os::unix::{
+        ffi::OsStrExt,
+        io::{FromRawFd, IntoRawFd},
+    },
 };
 
 use nix::{
     pty::{self, ForkptyResult},
     unistd::{self, Pid},
 };
+use tokio::io::{AsyncBufReadExt, BufReader};
 
 use shell_path_resolver::ShellPathResolver;
-use tokio::io::{AsyncBufReadExt, BufReader};
 
 pub struct Terminal {
     _child: Pid,
@@ -35,8 +38,12 @@ impl Terminal {
 
     pub async fn read(&mut self) -> splix_error::Result<Vec<char>> {
         // Get the available bytes in the buffer
-        let buffer = self.reader.fill_buf().await.map_err(splix_error::Error::ReadFromPty)?;
-        
+        let buffer = self
+            .reader
+            .fill_buf()
+            .await
+            .map_err(splix_error::Error::ReadFromPty)?;
+
         if buffer.is_empty() {
             return Ok(Vec::new()); // EOF
         }
@@ -44,7 +51,7 @@ impl Terminal {
         // Try to decode as much as possible
         let mut chars = Vec::new();
         let buffer_len = buffer.len();
-        
+
         match std::str::from_utf8(buffer) {
             Ok(s) => {
                 // Successfully decoded the entire buffer
@@ -63,7 +70,8 @@ impl Terminal {
                 if valid_up_to < buffer_len {
                     // If we have an incomplete sequence from before, combine it
                     if !self.incomplete_utf8.is_empty() {
-                        self.incomplete_utf8.extend_from_slice(&buffer[valid_up_to..]);
+                        self.incomplete_utf8
+                            .extend_from_slice(&buffer[valid_up_to..]);
                     } else {
                         // Start a new incomplete sequence
                         self.incomplete_utf8 = buffer[valid_up_to..].to_vec();

@@ -1,14 +1,14 @@
 use crate::WindowId;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct PaneId {
-    window: WindowId,
     id: usize,
+    window: WindowId,
 }
 
 impl PaneId {
-    pub fn new(window: WindowId, id: usize) -> Self {
-        Self { window, id }
+    pub fn new(id: usize, window: WindowId) -> Self {
+        Self { id, window }
     }
 
     pub fn get(&self) -> usize {

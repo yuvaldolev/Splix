@@ -2,13 +2,13 @@ use std::io::{self, Stdout, Write};
 
 use splix_ansi::AnsiEncoder;
 
-const ENTER_ANSI_ESCAPE_CODE: &str = "?1049h";
-const LEAVE_ANSI_ESCAPE_CODE: &str = "?1049l";
-
 pub struct AlternateScreen {
     ansi_encoder: AnsiEncoder,
     tty: Stdout,
 }
+
+const ENTER_ANSI_ESCAPE_CODE: &str = "?1049h";
+const LEAVE_ANSI_ESCAPE_CODE: &str = "?1049l";
 
 impl AlternateScreen {
     pub fn new() -> splix_error::Result<Self> {

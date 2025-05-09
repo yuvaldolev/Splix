@@ -1,14 +1,14 @@
 use crate::SessionId;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct WindowId {
-    session: SessionId,
     id: usize,
+    session: SessionId,
 }
 
 impl WindowId {
-    pub fn new(session: SessionId, id: usize) -> Self {
-        Self { session, id }
+    pub fn new(id: usize, session: SessionId) -> Self {
+        Self { id, session }
     }
 
     pub fn get(&self) -> usize {

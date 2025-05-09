@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 splix_error = { path = "../splix_error" }
+splix_event = { path = "../splix_event" }
 splix_id = { path = "../splix_id" }
 splix_terminal = { path = "../splix_terminal" }
 tokio = { version = "1.44.2", features = ["rt", "sync"] }

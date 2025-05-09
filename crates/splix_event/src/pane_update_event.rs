@@ -1,3 +1,12 @@
+use splix_id::PaneId;
+
+#[derive(Debug)]
 pub struct PaneUpdateEvent {
-    pane_id: PaneId,
+    pane: PaneId,
+}
+
+impl PaneUpdateEvent {
+    pub fn new(pane: PaneId) -> Self {
+        Self { pane }
+    }
 }

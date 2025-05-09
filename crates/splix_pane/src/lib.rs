@@ -2,36 +2,31 @@ mod grid;
 
 pub use grid::{Grid, GridUpdate};
 
-use splix_id::PaneId;
-use splix_terminal::Terminal;
 use tokio::sync::mpsc::Sender;
 
-pub struct PaneUpdate {
-    pub pane_id: PaneId,
-    pub update: GridUpdate,
-}
+use splix_event::{Event, PaneUpdateEvent};
+use splix_id::PaneId;
+use splix_terminal::Terminal;
 
 pub struct Pane {
-    pub id: PaneId,
-    pub grid: Grid,
-    sender: Sender<PaneUpdate>,
+    id: PaneId,
+    grid: Grid,
 }
 
 impl Pane {
-    pub fn new(id: PaneId, sender: Sender<PaneUpdate>) -> splix_error::Result<Self> {
+    pub fn new(id: PaneId, event_sender: Sender<Event>) -> splix_error::Result<Self> {
         let grid = Grid::new();
 
-        let pane = Self { id, grid, sender };
+        let pane = Self { id, grid };
 
         // Clone the sender for the async task
-        let task_sender = pane.sender.clone();
         let task_id = pane.id;
 
         // Create a terminal for the async task
         let task_terminal = Terminal::new()?;
 
         tokio::spawn(async move {
-            Self::handle_terminal_io(task_terminal, task_sender, task_id)
+            Self::handle_terminal_io(task_terminal, event_sender, task_id)
                 .await
                 .ok();
         });
@@ -45,7 +40,7 @@ impl Pane {
 
     async fn handle_terminal_io(
         mut terminal: Terminal,
-        sender: Sender<PaneUpdate>,
+        event_sender: Sender<Event>,
         pane_id: PaneId,
     ) -> splix_error::Result<()> {
         loop {
@@ -62,8 +57,8 @@ impl Pane {
                         } else {
                             GridUpdate::AppendChar(ch)
                         };
-                        sender
-                            .send(PaneUpdate { pane_id, update })
+                        event_sender
+                            .send(Event::PaneUpdate(PaneUpdateEvent::new(pane_id)))
                             .await
                             .map_err(|_| splix_error::Error::SendPaneUpdate)?;
                     }

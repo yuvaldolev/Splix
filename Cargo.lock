@@ -252,9 +252,11 @@ name = "splix"
 version = "0.1.0"
 dependencies = [
  "splix_error",
+ "splix_event",
  "splix_id",
  "splix_session",
  "splix_termios",
+ "tokio",
 ]
 
 [[package]]
@@ -272,6 +274,9 @@ dependencies = [
 [[package]]
 name = "splix_event"
 version = "0.1.0"
+dependencies = [
+ "splix_id",
+]
 
 [[package]]
 name = "splix_id"
@@ -291,6 +296,7 @@ name = "splix_pane"
 version = "0.1.0"
 dependencies = [
  "splix_error",
+ "splix_event",
  "splix_id",
  "splix_terminal",
  "tokio",
@@ -303,8 +309,10 @@ dependencies = [
  "async-trait",
  "byteorder",
  "splix_error",
+ "splix_event",
  "splix_id",
  "splix_window",
+ "tokio",
 ]
 
 [[package]]
@@ -330,6 +338,7 @@ name = "splix_window"
 version = "0.1.0"
 dependencies = [
  "splix_error",
+ "splix_event",
  "splix_id",
  "splix_pane",
  "tokio",
@@ -368,9 +377,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.44.2"
+version = "1.45.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6b88822cbe49de4185e3a4cbf8321dd487cf5fe0c5c65695fef6346371e9c48"
+checksum = "2513ca694ef9ede0fb23fe71a4ee4107cb102b9dc1930f6d0fd77aae068ae165"
 dependencies = [
  "backtrace",
  "bytes",
