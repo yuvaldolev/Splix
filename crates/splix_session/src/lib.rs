@@ -1,7 +1,7 @@
 use tokio::sync::mpsc::Sender;
 
-use splix_event::Event;
-use splix_id::{SessionId, WindowId};
+use splix_event::{Event, GridUpdate};
+use splix_id::{PaneId, SessionId, WindowId};
 use splix_window::Window;
 
 pub struct Session {
@@ -39,6 +39,16 @@ impl Session {
         // let byte = self.terminal.read().await;
         // io::stdout().write_u8(byte).unwrap();
         // }
+    }
+
+    /// TODO: Should probably use `WindowId` instead of `usize`.
+    pub fn get_window(&self, index: usize) -> &Window {
+        &self.windows[index]
+    }
+
+    pub fn update_pane(&mut self, pane: PaneId, grid_update: &GridUpdate) {
+        let window = &mut self.windows[pane.get_window().get()];
+        window.update_pane(pane, grid_update);
     }
 
     fn new_window(&mut self) -> splix_error::Result<()> {

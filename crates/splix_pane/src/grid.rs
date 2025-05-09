@@ -1,9 +1,3 @@
-#[derive(Debug)]
-pub enum GridUpdate {
-    AppendChar(char),
-    NewLine,
-}
-
 #[derive(Clone)]
 pub struct Grid {
     data: Vec<Vec<char>>,

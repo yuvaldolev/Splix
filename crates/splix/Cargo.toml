@@ -4,9 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+glam = { version = "0.30.3", features = ["fast-math"] }
 splix_error = { path = "../splix_error" }
 splix_event = { path = "../splix_event" }
 splix_id = { path = "../splix_id" }
+splix_pane = { path = "../splix_pane" }
+splix_renderer = { path = "../splix_renderer" }
 splix_session = { path = "../splix_session" }
 splix_termios = { path = "../splix_termios" }
+splix_window = { path = "../splix_window" }
+terminal_size = "0.4.2"
 tokio = { version = "1.45.0", features = ["sync"] }

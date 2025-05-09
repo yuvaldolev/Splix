@@ -9,6 +9,7 @@ members = [
   "crates/splix_id",
   "crates/splix_main",
   "crates/splix_pane",
+  "crates/splix_renderer",
   "crates/splix_session",
   "crates/splix_terminal",
   "crates/splix_termios",

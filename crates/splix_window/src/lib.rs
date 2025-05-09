@@ -1,7 +1,7 @@
 use tokio::sync::mpsc::Sender;
 
 use splix_error::Result;
-use splix_event::Event;
+use splix_event::{Event, GridUpdate};
 use splix_id::{PaneId, WindowId};
 use splix_pane::Pane;
 
@@ -24,6 +24,16 @@ impl Window {
         window.new_pane()?;
 
         Ok(window)
+    }
+
+    /// TODO: Should probably use `PaneId` instead of `usize`.
+    pub fn get_pane(&self, index: usize) -> &Pane {
+        &self.panes[index]
+    }
+
+    pub fn update_pane(&mut self, pane: PaneId, grid_update: &GridUpdate) {
+        let pane = &mut self.panes[pane.get()];
+        pane.update(grid_update);
     }
 
     fn new_pane(&mut self) -> splix_error::Result<()> {

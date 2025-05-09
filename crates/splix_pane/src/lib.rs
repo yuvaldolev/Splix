@@ -1,10 +1,9 @@
 mod grid;
 
-pub use grid::{Grid, GridUpdate};
-
+use grid::Grid;
 use tokio::sync::mpsc::Sender;
 
-use splix_event::{Event, PaneUpdateEvent};
+use splix_event::{Event, GridUpdate, PaneUpdateEvent};
 use splix_id::PaneId;
 use splix_terminal::Terminal;
 
@@ -38,6 +37,13 @@ impl Pane {
         &self.grid
     }
 
+    pub fn update(&mut self, grid_update: &GridUpdate) {
+        match grid_update {
+            GridUpdate::AppendChar(c) => self.grid.update(*c),
+            GridUpdate::NewLine => self.grid.new_line(),
+        }
+    }
+
     async fn handle_terminal_io(
         mut terminal: Terminal,
         event_sender: Sender<Event>,
@@ -57,8 +63,9 @@ impl Pane {
                         } else {
                             GridUpdate::AppendChar(ch)
                         };
+
                         event_sender
-                            .send(Event::PaneUpdate(PaneUpdateEvent::new(pane_id)))
+                            .send(Event::PaneUpdate(PaneUpdateEvent::new(pane_id, update)))
                             .await
                             .map_err(|_| splix_error::Error::SendPaneUpdate)?;
                     }

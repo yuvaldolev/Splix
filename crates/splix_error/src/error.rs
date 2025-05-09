@@ -27,4 +27,7 @@ pub enum Error {
 
     #[error("failed sending pane update")]
     SendPaneUpdate,
+
+    #[error("failed retrieving the terminal size")]
+    RetrieveTerminalSize,
 }
