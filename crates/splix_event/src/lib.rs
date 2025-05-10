@@ -5,4 +5,5 @@ pub use pane_update_event::{GridUpdate, PaneUpdateEvent};
 #[derive(Debug)]
 pub enum Event {
     PaneUpdate(PaneUpdateEvent),
+    Input(u8),
 }

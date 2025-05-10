@@ -1,22 +1,29 @@
-use std::io;
+use tokio::{
+    io::{self, AsyncReadExt},
+    sync::mpsc::Sender,
+};
 
 use splix_event::Event;
-use tokio::{fs::File, sync::mpsc::Sender};
 
 pub struct InputReceiver;
 
 impl InputReceiver {
     pub fn new(event_sender: Sender<Event>) -> Self {
         tokio::spawn(async move {
-            Self::receive(event_sender);
+            Self::receive(event_sender).await;
         });
 
         Self
     }
 
-    fn receive(event_sender: Sender<Event>) {
-        let stdin = File::from_std(io::stdin().into());
+    async fn receive(event_sender: Sender<Event>) {
+        let mut stdin = io::stdin();
 
-        loop {}
+        loop {
+            event_sender
+                .send(Event::Input(stdin.read_u8().await.unwrap()))
+                .await
+                .unwrap();
+        }
     }
 }

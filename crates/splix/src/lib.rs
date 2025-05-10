@@ -1,4 +1,5 @@
 use glam::UVec2;
+use splix_input::InputReceiver;
 use splix_renderer::Renderer;
 use terminal_size::{Height, Width};
 use tokio::sync::mpsc::{self, Receiver, Sender};
@@ -10,6 +11,7 @@ use splix_termios::Termios;
 
 pub struct Splix {
     _termios: Termios,
+    _input_receiver: InputReceiver,
     sessions: Vec<Session>,
     next_session_id: usize,
     event_sender: Sender<Event>,
@@ -26,9 +28,11 @@ impl Splix {
         let termios = Termios::new()?;
         let (event_sender, event_receiver): (Sender<Event>, Receiver<Event>) =
             mpsc::channel(EVENT_CHANNEL_CAPACITY);
+        let input_receiver = InputReceiver::new(event_sender.clone());
 
         let mut splix = Self {
             _termios: termios,
+            _input_receiver: input_receiver,
             sessions: Vec::new(),
             next_session_id: 0,
             event_sender,
@@ -43,7 +47,7 @@ impl Splix {
 
     pub async fn run(&mut self) -> splix_error::Result<()> {
         while let Some(event) = self.event_receiver.recv().await {
-            self.handle_event(&event);
+            self.handle_event(&event).await;
         }
 
         Ok(())
@@ -68,9 +72,10 @@ impl Splix {
         Ok(())
     }
 
-    fn handle_event(&mut self, event: &Event) {
+    async fn handle_event(&mut self, event: &Event) {
         match event {
             Event::PaneUpdate(event) => self.handle_pane_update(event),
+            Event::Input(input) => self.handle_input(*input).await,
         }
     }
 
@@ -78,6 +83,10 @@ impl Splix {
         let session = &mut self.sessions[event.get_pane().get_window().get_session().get()];
         session.update_pane(event.get_pane(), event.get_grid_update());
         self.redraw();
+    }
+
+    async fn handle_input(&mut self, input: u8) {
+        self.sessions[0].process_input(input).await;
     }
 
     fn redraw(&mut self) {

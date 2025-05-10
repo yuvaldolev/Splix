@@ -2,36 +2,48 @@ mod shell_path_resolver;
 
 use std::{
     ffi::CString,
-    os::unix::{
-        ffi::OsStrExt,
-        io::{FromRawFd, IntoRawFd},
+    os::{
+        fd::AsRawFd,
+        unix::{
+            ffi::OsStrExt,
+            io::{FromRawFd, IntoRawFd},
+        },
     },
 };
 
 use nix::{
+    fcntl::{self, FcntlArg, OFlag},
     pty::{self, ForkptyResult},
     unistd::{self, Pid},
 };
-use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufStream};
 
 use shell_path_resolver::ShellPathResolver;
 
 pub struct Terminal {
     _child: Pid,
-    reader: BufReader<tokio::fs::File>,
+    pty: BufStream<tokio::fs::File>,
     incomplete_utf8: Vec<u8>,
 }
 
 impl Terminal {
     pub fn new() -> splix_error::Result<Self> {
         let (child, master_pty) = Self::spawn_child()?;
-        // Convert to std::fs::File first, then to tokio::fs::File
-        let std_file = unsafe { std::fs::File::from_raw_fd(master_pty.into_raw_fd()) };
-        let file = tokio::fs::File::from_std(std_file);
+
+        let pty_flags = OFlag::from_bits_truncate(
+            fcntl::fcntl(master_pty.as_raw_fd(), FcntlArg::F_GETFL).unwrap(),
+        );
+        fcntl::fcntl(
+            master_pty.as_raw_fd(),
+            FcntlArg::F_SETFL(pty_flags | OFlag::O_NONBLOCK),
+        )
+        .unwrap();
+
+        let file = tokio::fs::File::from_std(master_pty);
 
         Ok(Self {
             _child: child,
-            reader: BufReader::new(file),
+            pty: BufStream::new(file),
             incomplete_utf8: Vec::new(),
         })
     }
@@ -39,10 +51,10 @@ impl Terminal {
     pub async fn read(&mut self) -> splix_error::Result<Vec<char>> {
         // Get the available bytes in the buffer
         let buffer = self
-            .reader
+            .pty
             .fill_buf()
             .await
-            .map_err(splix_error::Error::ReadFromPty)?;
+            .map_err(splix_error::Error::ReadFromTerminal)?;
 
         if buffer.is_empty() {
             return Ok(Vec::new()); // EOF
@@ -83,9 +95,19 @@ impl Terminal {
         }
 
         // Always consume all bytes from the buffer
-        self.reader.consume(buffer_len);
+        self.pty.consume(buffer_len);
 
         Ok(chars)
+    }
+
+    pub async fn write(&mut self, input: u8) -> splix_error::Result<()> {
+        self.pty
+            .get_mut()
+            .write_u8(input)
+            .await
+            .map_err(splix_error::Error::WriteToTerminal)?;
+
+        Ok(())
     }
 
     fn spawn_child() -> splix_error::Result<(Pid, std::fs::File)> {

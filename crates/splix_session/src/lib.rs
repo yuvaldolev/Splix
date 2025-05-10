@@ -51,6 +51,10 @@ impl Session {
         window.update_pane(pane, grid_update);
     }
 
+    pub async fn process_input(&mut self, input: u8) {
+        self.windows[0].process_input(input).await;
+    }
+
     fn new_window(&mut self) -> splix_error::Result<()> {
         let id = WindowId::new(self.next_window_id, self.id);
         let window = Window::new(id, self.event_sender.clone())?;
