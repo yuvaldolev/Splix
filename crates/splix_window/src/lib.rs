@@ -36,6 +36,10 @@ impl Window {
         pane.update(grid_update);
     }
 
+    pub async fn process_input(&mut self, input: u8) {
+        self.panes[0].process_input(input).await;
+    }
+
     fn new_pane(&mut self) -> splix_error::Result<()> {
         let id = PaneId::new(self.next_pane_id, self.id);
         let pane = Pane::new(id, self.event_sender.clone())?;

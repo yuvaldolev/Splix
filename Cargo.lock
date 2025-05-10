@@ -290,6 +290,7 @@ dependencies = [
  "splix_error",
  "splix_event",
  "splix_id",
+ "splix_input",
  "splix_pane",
  "splix_renderer",
  "splix_session",
