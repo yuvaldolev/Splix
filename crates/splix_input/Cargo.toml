@@ -1,0 +1,8 @@
+[package]
+name = "splix_input"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+splix_event = { path = "../splix_event" }
+tokio = { version = "1.45.0", features = ["fs", "rt", "sync"] }
