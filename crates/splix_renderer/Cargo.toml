@@ -7,3 +7,8 @@ edition = "2024"
 glam = { version = "0.30.3", features = ["fast-math"] }
 splix_pane = { path = "../splix_pane" }
 splix_window = { path = "../splix_window" }
+
+[dev-dependencies]
+splix_pane = { path = "../splix_pane" }
+splix_window = { path = "../splix_window" }
+splix_id = { path = "../splix_id" }

@@ -4,6 +4,8 @@ use splix_renderer::Renderer;
 use terminal_size::{Height, Width};
 use tokio::sync::mpsc::{self, Receiver, Sender};
 
+use std::io; // Added for std::io::stdout()
+
 use splix_event::{Event, PaneUpdateEvent};
 use splix_id::SessionId;
 use splix_session::Session;
@@ -37,7 +39,7 @@ impl Splix {
             next_session_id: 0,
             event_sender,
             event_receiver,
-            renderer: Renderer::new(screen_dimensions),
+            renderer: Renderer::new(screen_dimensions, io::stdout()), // Pass stdout
         };
 
         splix.new_session()?;
