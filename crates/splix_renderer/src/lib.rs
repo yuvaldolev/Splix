@@ -54,11 +54,18 @@ impl Renderer {
 
     fn flush(&mut self) {
         for y in 0..self.screen_dimensions.y {
-            for x in 0..self.screen_dimensions.x {
-                let character =
-                    self.render_buffer[self.render_buffer_index_from_position(UVec2::new(x, y))];
-                write!(self.stdout, "{character}").unwrap();
-            }
+            write!(
+                self.stdout,
+                "{}",
+                (&self.render_buffer[self.render_buffer_index_from_position(UVec2::new(0, y))
+                    ..self.render_buffer_index_from_position(UVec2::new(
+                        self.screen_dimensions.x,
+                        y
+                    ))])
+                    .iter()
+                    .collect::<String>()
+            )
+            .unwrap();
 
             self.move_cursor_to_next_line();
         }
