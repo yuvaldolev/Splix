@@ -1,4 +1,4 @@
-use std::io;
+use std::{io, path::PathBuf};
 
 use nix::errno::Errno;
 
@@ -33,4 +33,7 @@ pub enum Error {
 
     #[error("failed retrieving the terminal size")]
     RetrieveTerminalSize,
+
+    #[error("failed binding unix domain socket at path '{1}'")]
+    BindUnixDomainSocket(#[source] io::Error, PathBuf),
 }

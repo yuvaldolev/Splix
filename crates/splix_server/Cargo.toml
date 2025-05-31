@@ -1,0 +1,11 @@
+[package]
+name = "splix_server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+splix_api = { path = "../splix_api" }
+splix_error = { path = "../splix_error" }
+tokio = { workspace = true, features = ["net"] }
+tokio-stream = { workspace = true, featres = ["net"] }
+tonic = { workspace = true }

@@ -1,0 +1,13 @@
+[package]
+name = "splix_logger"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+tracing-appender = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+anyhow = { workspace = true }
+ringbuf = { workspace = true }
+tempfile = { workspace = true }

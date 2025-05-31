@@ -4,5 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+nix = { workspace = true, features = ["fs"] }
 splix_event = { path = "../splix_event" }
-tokio = { version = "1.45.0", features = ["fs", "rt", "sync"] }
+tokio = { workspace = true, features = [
+  "fs",
+  "io-std",
+  "io-util",
+  "rt",
+  "sync",
+] }

@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-glam = { version = "0.30.3", features = ["fast-math"] }
+glam = { workspace = true, features = ["fast-math"] }
 splix_pane = { path = "../splix_pane" }
 splix_window = { path = "../splix_window" }

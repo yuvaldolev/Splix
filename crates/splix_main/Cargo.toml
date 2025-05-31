@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-anyhow = "1.0.95"
+anyhow = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
 splix = { path = "../splix" }
-tokio = { version = "1.44.1", features = ["full"] }
+splix_logger = { path = "../splix_logger" }
+tokio = { workspace = true, features = ["full"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }

@@ -3,7 +3,7 @@ mod shell_path_resolver;
 use std::{
     ffi::CString,
     os::{
-        fd::AsRawFd,
+        fd::AsFd,
         unix::{
             ffi::OsStrExt,
             io::{FromRawFd, IntoRawFd},
@@ -30,11 +30,10 @@ impl Terminal {
     pub fn new() -> splix_error::Result<Self> {
         let (child, master_pty) = Self::spawn_child()?;
 
-        let pty_flags = OFlag::from_bits_truncate(
-            fcntl::fcntl(master_pty.as_raw_fd(), FcntlArg::F_GETFL).unwrap(),
-        );
+        let pty_flags =
+            OFlag::from_bits_truncate(fcntl::fcntl(master_pty.as_fd(), FcntlArg::F_GETFL).unwrap());
         fcntl::fcntl(
-            master_pty.as_raw_fd(),
+            master_pty.as_fd(),
             FcntlArg::F_SETFL(pty_flags | OFlag::O_NONBLOCK),
         )
         .unwrap();
