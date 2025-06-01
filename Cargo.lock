@@ -1048,7 +1048,18 @@ name = "splix_input"
 version = "0.1.0"
 dependencies = [
  "nix",
+ "splix_error",
  "splix_event",
+ "splix_io",
+ "tokio",
+]
+
+[[package]]
+name = "splix_io"
+version = "0.1.0"
+dependencies = [
+ "nix",
+ "splix_error",
  "tokio",
 ]
 

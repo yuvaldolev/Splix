@@ -1,14 +1,12 @@
-use std::os::fd::AsFd;
-
-use nix::fcntl::{self, FcntlArg, OFlag};
-use tokio::{
-    io::{self, AsyncReadExt},
-    sync::mpsc::Sender,
-};
+use std::io::{self};
 
 use splix_event::Event;
+use splix_io::AsyncFile;
+use tokio::sync::mpsc::Sender;
 
 pub struct InputReceiver;
+
+const READ_BUFFER_SIZE: usize = 1024;
 
 impl InputReceiver {
     pub fn new(event_sender: Sender<Event>) -> Self {
@@ -17,22 +15,23 @@ impl InputReceiver {
         Self
     }
 
-    async fn receive(event_sender: Sender<Event>) {
-        let mut stdin = io::stdin();
-
-        let pty_flags =
-            OFlag::from_bits_truncate(fcntl::fcntl(stdin.as_fd(), FcntlArg::F_GETFL).unwrap());
-        fcntl::fcntl(
-            stdin.as_fd(),
-            FcntlArg::F_SETFL(pty_flags | OFlag::O_NONBLOCK),
-        )
-        .unwrap();
+    async fn receive(event_sender: Sender<Event>) -> splix_error::Result<()> {
+        let mut stdin = AsyncFile::new(io::stdin())?;
+        let mut buffer: [u8; READ_BUFFER_SIZE] = [0; READ_BUFFER_SIZE];
 
         loop {
-            event_sender
-                .send(Event::Input(stdin.read_u8().await.unwrap()))
-                .await
-                .unwrap();
+            let bytes_read = stdin.read(&mut buffer).await?;
+
+            // TODO: Is stdin closing an error?
+            if 0 == bytes_read {
+                break;
+            }
+
+            for byte in &buffer[0..bytes_read] {
+                event_sender.send(Event::Input(*byte)).await.unwrap()
+            }
         }
+
+        Ok(())
     }
 }

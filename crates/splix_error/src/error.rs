@@ -1,4 +1,4 @@
-use std::{io, path::PathBuf};
+use std::{io, os::fd::RawFd, path::PathBuf};
 
 use nix::errno::Errno;
 
@@ -36,4 +36,19 @@ pub enum Error {
 
     #[error("failed binding unix domain socket at path '{1}'")]
     BindUnixDomainSocket(#[source] io::Error, PathBuf),
+
+    #[error("failed receiving input")]
+    ReceiveInput(#[source] io::Error),
+
+    #[error("failed creating AsyncFd for file '{1}'")]
+    CreateAsyncFdForFile(#[source] io::Error, RawFd),
+
+    #[error("failed setting file '{1}' to non-blocking")]
+    MakeFileNonBlocking(#[source] Errno, RawFd),
+
+    #[error("failed waiting for file '{1}' to become readable")]
+    WaitForFileToBecomeReadable(#[source] io::Error, RawFd),
+
+    #[error("failed reading from file '{1}'")]
+    ReadFromFile(#[source] io::Error, RawFd),
 }

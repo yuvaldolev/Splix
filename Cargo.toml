@@ -9,6 +9,7 @@ members = [
   "crates/splix_event",
   "crates/splix_id",
   "crates/splix_input",
+  "crates/splix_io",
   "crates/splix_logger",
   "crates/splix_main",
   "crates/splix_pane",

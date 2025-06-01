@@ -1,12 +1,9 @@
-use std::{fs, path::PathBuf};
+use std::path::PathBuf;
 
 use glam::UVec2;
 use splix_server::Server;
 use terminal_size::{Height, Width};
-use tokio::{
-    net::UnixListener,
-    sync::mpsc::{self, Receiver, Sender},
-};
+use tokio::sync::mpsc::{self, Receiver, Sender};
 
 use splix_event::{Event, PaneUpdateEvent};
 use splix_id::SessionId;
@@ -18,7 +15,7 @@ use splix_termios::Termios;
 pub struct Splix {
     _termios: Termios,
     _input_receiver: InputReceiver,
-    server: Server,
+    _server: Server,
     sessions: Vec<Session>,
     next_session_id: usize,
     event_sender: Sender<Event>,
@@ -40,7 +37,7 @@ impl Splix {
         let mut splix = Self {
             _termios: termios,
             _input_receiver: input_receiver,
-            server: Server::new(PathBuf::from("/tmp/splix.sock")),
+            _server: Server::new(PathBuf::from("/tmp/splix.sock")),
             sessions: Vec::new(),
             next_session_id: 0,
             event_sender,
@@ -54,9 +51,9 @@ impl Splix {
     }
 
     pub async fn run(&mut self) -> splix_error::Result<()> {
-        // while let Some(event) = self.event_receiver.recv().await {
-        //     self.handle_event(&event).await;
-        // }
+        while let Some(event) = self.event_receiver.recv().await {
+            self.handle_event(&event).await;
+        }
 
         Ok(())
     }

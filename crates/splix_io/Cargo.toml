@@ -1,11 +1,9 @@
 [package]
-name = "splix_input"
+name = "splix_io"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 nix = { workspace = true, features = ["fs"] }
 splix_error = { path = "../splix_error" }
-splix_event = { path = "../splix_event" }
-splix_io = { path = "../splix_io" }
-tokio = { workspace = true, features = ["sync"] }
+tokio = { workspace = true, features = ["net"] }
