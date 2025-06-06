@@ -1,4 +1,4 @@
-use std::io::{self};
+use std::io;
 
 use splix_event::Event;
 use splix_io::AsyncFile;

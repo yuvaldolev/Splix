@@ -6,6 +6,8 @@ use std::{
 use nix::fcntl::{self, FcntlArg, OFlag};
 use tokio::io::unix::AsyncFd;
 
+// TODO: Should we add an option to release the file without closing it?
+
 pub struct AsyncFile<T: AsRawFd> {
     fd: AsyncFd<T>,
 }
@@ -33,6 +35,7 @@ where
     }
 
     fn set_non_blocking(file: &T) -> splix_error::Result<()> {
+        // TODO: Remove unwrap.
         let open_flags = OFlag::from_bits_truncate(fcntl::fcntl(file, FcntlArg::F_GETFL).unwrap());
         fcntl::fcntl(file, FcntlArg::F_SETFL(open_flags | OFlag::O_NONBLOCK))
             .map_err(|e| splix_error::Error::MakeFileNonBlocking(e, file.as_raw_fd()))?;
