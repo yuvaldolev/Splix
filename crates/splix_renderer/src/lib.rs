@@ -22,7 +22,7 @@ impl Renderer {
     pub fn begin_frame(&mut self) {
         self.reset_cursor();
 
-        // TODO: Should be probably removed later.
+        // TODO: Should probably be removed later.
         self.reset_render_buffer();
     }
 
@@ -82,6 +82,10 @@ impl Renderer {
             }
 
             for (x, character) in line.iter().enumerate() {
+                if (x as u32) >= self.screen_dimensions.x {
+                    break;
+                }
+
                 let index = self.render_buffer_index_from_position(UVec2::new(x as u32, y as u32));
                 self.render_buffer[index] = *character;
             }
