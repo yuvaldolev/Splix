@@ -60,42 +60,39 @@ impl Terminal {
             return Ok(Vec::new()); // EOF
         }
 
-        // Try to decode as much as possible
-        let mut chars = Vec::new();
-        let buffer_len = buffer.len();
+        let buffer_length = buffer.len();
 
-        match std::str::from_utf8(buffer) {
+        // Combine any pending bytes with the newly read bytes while reusing the
+        // existing allocation for `self.incomplete_utf8`
+        self.incomplete_utf8.reserve(buffer_length);
+        self.incomplete_utf8.extend_from_slice(buffer);
+
+        let mut chars = Vec::new();
+
+        match std::str::from_utf8(&self.incomplete_utf8) {
             Ok(s) => {
-                // Successfully decoded the entire buffer
+                // Entire buffer decoded successfully
                 chars.extend(s.chars());
                 self.incomplete_utf8.clear();
             }
             Err(e) => {
                 let valid_up_to = e.valid_up_to();
                 if valid_up_to > 0 {
-                    // We have some valid UTF-8, decode it
-                    let s = std::str::from_utf8(&buffer[..valid_up_to]).unwrap();
+                    let s = std::str::from_utf8(&self.incomplete_utf8[..valid_up_to]).unwrap();
                     chars.extend(s.chars());
                 }
 
-                // Check if we have an incomplete UTF-8 sequence at the end
-                if valid_up_to < buffer_len {
-                    // If we have an incomplete sequence from before, combine it
-                    if !self.incomplete_utf8.is_empty() {
-                        self.incomplete_utf8
-                            .extend_from_slice(&buffer[valid_up_to..]);
-                    } else {
-                        // Start a new incomplete sequence
-                        self.incomplete_utf8 = buffer[valid_up_to..].to_vec();
-                    }
+                // Save the remaining incomplete bytes for the next call
+                if valid_up_to < self.incomplete_utf8.len() {
+                    self.incomplete_utf8.drain(..valid_up_to);
                 } else {
                     self.incomplete_utf8.clear();
                 }
             }
         }
 
-        // Always consume all bytes from the buffer
-        self.pty.consume(buffer_len);
+        // Consume only the bytes we have read from the pty buffer
+        self.pty.consume(buffer_length);
 
         Ok(chars)
     }
