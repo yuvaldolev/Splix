@@ -50,51 +50,53 @@ impl Terminal {
 
     pub async fn read(&mut self) -> splix_error::Result<Vec<char>> {
         // Get the available bytes in the buffer
-        let buffer = self
-            .pty
-            .fill_buf()
-            .await
-            .map_err(splix_error::Error::ReadFromTerminal)?;
+        let buffer_len = {
+            let buffer = self
+                .pty
+                .fill_buf()
+                .await
+                .map_err(splix_error::Error::ReadFromTerminal)?;
 
-        if buffer.is_empty() {
-            return Ok(Vec::new()); // EOF
-        }
+            if buffer.is_empty() {
+                return Ok(Vec::new()); // EOF
+            }
 
-        // Try to decode as much as possible
+            // Prepend any incomplete UTF-8 bytes from the previous read
+            if !self.incomplete_utf8.is_empty() {
+                self.incomplete_utf8.extend_from_slice(buffer);
+            } else {
+                self.incomplete_utf8 = buffer.to_vec();
+            }
+
+            buffer.len()
+        };
+
         let mut chars = Vec::new();
-        let buffer_len = buffer.len();
+        let combined_len = self.incomplete_utf8.len();
 
-        match std::str::from_utf8(buffer) {
+        match std::str::from_utf8(&self.incomplete_utf8) {
             Ok(s) => {
-                // Successfully decoded the entire buffer
+                // Entire buffer decoded successfully
                 chars.extend(s.chars());
                 self.incomplete_utf8.clear();
             }
             Err(e) => {
                 let valid_up_to = e.valid_up_to();
                 if valid_up_to > 0 {
-                    // We have some valid UTF-8, decode it
-                    let s = std::str::from_utf8(&buffer[..valid_up_to]).unwrap();
+                    let s = std::str::from_utf8(&self.incomplete_utf8[..valid_up_to]).unwrap();
                     chars.extend(s.chars());
                 }
 
-                // Check if we have an incomplete UTF-8 sequence at the end
-                if valid_up_to < buffer_len {
-                    // If we have an incomplete sequence from before, combine it
-                    if !self.incomplete_utf8.is_empty() {
-                        self.incomplete_utf8
-                            .extend_from_slice(&buffer[valid_up_to..]);
-                    } else {
-                        // Start a new incomplete sequence
-                        self.incomplete_utf8 = buffer[valid_up_to..].to_vec();
-                    }
+                // Save the remaining incomplete bytes for the next call
+                if valid_up_to < combined_len {
+                    self.incomplete_utf8 = self.incomplete_utf8[valid_up_to..].to_vec();
                 } else {
                     self.incomplete_utf8.clear();
                 }
             }
         }
 
-        // Always consume all bytes from the buffer
+        // Consume only the bytes we have read from the pty buffer
         self.pty.consume(buffer_len);
 
         Ok(chars)
